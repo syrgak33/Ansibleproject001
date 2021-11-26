@@ -1,0 +1,26 @@
+---
+- name: Exchange Keys between servers
+  hosts: servers
+  become: yes
+  become_user: ansible
+  tasks:
+    - name: SSH KeyGen command
+      shell: > 
+        ssh-keygen -q -b 2048 -t rsa -N "" -C "creating SSH" -f ~/.ssh/id_rsa
+        creates="~/.ssh/id_rsa"
+
+    - name: Fetch the keyfile from one server to another
+      fetch: 
+        src: "/home/ansible/.ssh/id_rsa"
+        dest: "/home/ansible/project1/sshkeys/{{inventory_hostname}}-id_rsa"
+        flat: yes
+    - name: Set up authorized keys for the ansible user
+      authorized_key: user=ansible key="{{item}}"
+      with_file:
+        - /home/ansible/.ssh/id_rsa.pub
+
+
+# 1. this playbook is separated from roles, cause you need to specify user in "become_user"
+# to create ssh keys in the right directory.
+# 2. then it will download pubkeys from them with fetch module ( you might need pubkeys if you use scp)
+# 3. and in the end using the module authorized_keys it will send your master's pubkey to clientservers.

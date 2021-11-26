@@ -1,0 +1,24 @@
+---
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
+- name: Add sudoers users to wheel group
+  user:
+    name=ansible
+    groups=wheel
+    append=yes
+    state=present
+    createhome=yes
+
+
+### Well, first of all we need to make wheelgroup users to sudo without password, 
+# so we use "lineinfile" module to change wheel line in visudo.
+# validate part needed to validate before copying(someone wrote that it's for extra security)
+# 2nd block will create user and add to wheel group,append will add 2nd group wheel to ansible
+# user without deleting ansible group.
+ 

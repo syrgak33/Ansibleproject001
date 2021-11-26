@@ -1,0 +1,21 @@
+---
+# tasks file for archiving
+# when you initiate playbook it will gather some information from client servers automatically
+# and with set_fact module you can turn specific information into usable variable, in this case
+# variable is "currenttime". 
+# Then it will compress log files into home directory of the client servers and then send it to 
+# a master ansible server, specifying hostname and currenttime.
+- set_fact: 
+    currenttime: "{{ ansible_date_time.date }}"
+- name: Compress directory /var/log into /home/ansible/logs.zip
+  archive:
+    path: /var/log
+    dest: /home/ansible/logs.tar.gz
+    owner: ansible
+    group: ansible
+    format: gz
+- name: Fetch the log files to the master
+  fetch: 
+    src: /home/ansible/logs.tar.gz
+    dest: /home/ansible/logfetch/logbackup-{{ inventory_hostname}}-{{ currenttime }}.tar.gz
+    flat: yes

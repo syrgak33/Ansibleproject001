@@ -1,0 +1,11 @@
+---
+- hosts: servers
+  become: yes
+  roles: 
+#    - ansibleusers
+    - archiving
+
+### change hosts to the group you need. 
+#   become: yes (runs it with root privilegies, or adds sudo to a user) 
+ 
+
